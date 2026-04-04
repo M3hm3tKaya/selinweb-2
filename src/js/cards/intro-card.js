@@ -6,7 +6,7 @@ export async function addIntroCard(cards) {
   await new Promise((resolve) => {
     img.onload = resolve
     img.onerror = resolve
-    img.src = '/src/assets/covers/cover-25.jpg'
+    img.src = '/covers/cover-25.jpg'
   })
 
   // Insert at front of array with lowest Z — fills the screen

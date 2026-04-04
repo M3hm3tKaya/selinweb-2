@@ -14,7 +14,7 @@ export async function loadClips() {
 
   // Check all in parallel
   const checks = names.map(name => {
-    const path = `/src/assets/clips/${name}.mp4`
+    const path = `/clips/${name}.mp4`
     return fetch(path, { method: 'HEAD' })
       .then(res => res.ok ? path : null)
       .catch(() => null)

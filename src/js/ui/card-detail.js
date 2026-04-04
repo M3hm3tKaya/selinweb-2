@@ -154,7 +154,7 @@ export function openDetail(card, fromLeft, fromTop, fromSize) {
     detailEl.querySelector('.card-detail__links').innerHTML = ''
   } else {
     // Image card: show cover + play preview
-    mediaEl.innerHTML = `<img src="/src/assets/covers/${card.mediaKey}.jpg" alt="${meta.title}" />`
+    mediaEl.innerHTML = `<img src="/covers/${card.mediaKey}.jpg" alt="${meta.title}" />`
 
     detailEl.querySelector('.card-detail__title').textContent = meta.title
     detailEl.querySelector('.card-detail__meta').textContent =

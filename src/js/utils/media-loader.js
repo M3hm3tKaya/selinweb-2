@@ -11,7 +11,7 @@ const loadedKeys = []
 export async function preloadImages(onProgress) {
   const entries = COVER_NUMBERS.map(n => {
     const num = String(n).padStart(2, '0')
-    return { key: `cover-${num}`, path: `/src/assets/covers/cover-${num}.jpg` }
+    return { key: `cover-${num}`, path: `/covers/cover-${num}.jpg` }
   })
 
   let loaded = 0
