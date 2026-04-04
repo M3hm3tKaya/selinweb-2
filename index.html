@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" data-palette="warm">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SELIN — Into The Void</title>
+    <meta name="description" content="Experience Selin's musical universe in an infinite flowing visual journey." />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="SELIN — Into The Void" />
+    <meta property="og:description" content="Experience Selin's musical universe in an infinite flowing visual journey." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SELIN — Into The Void" />
+    <meta name="twitter:description" content="Experience Selin's musical universe in an infinite flowing visual journey." />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MusicGroup",
+      "name": "SELIN",
+      "description": "Experience Selin's musical universe in an infinite flowing visual journey.",
+      "url": "https://selingecit.com"
+    }
+    </script>
+
+    <!-- Font preload -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body>
+    <canvas id="c" aria-label="Album artwork flowing in infinite depth" role="img"></canvas>
+
+    <!-- Video card overlays (dynamically added by JS) -->
+    <div id="videoLayer"></div>
+
+    <!-- Vignette -->
+    <div class="vignette" aria-hidden="true"></div>
+
+    <!-- UI Overlay -->
+    <div class="overlay" id="overlay">
+      <h1 class="overlay__title">SELIN</h1>
+      <p class="overlay__tagline">Scroll to explore</p>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav" aria-label="Main navigation">
+      <button class="nav__item" data-panel="bio">bio</button>
+      <button class="nav__item" data-panel="music">music</button>
+      <button class="nav__item" data-panel="live">live</button>
+      <button class="nav__item" data-panel="contact">contact</button>
+    </nav>
+
+    <!-- Palette Switcher -->
+    <div class="palette-switcher" id="paletteSwitcher"></div>
+
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+      <div class="preloader__title">SELIN</div>
+      <div class="preloader__bar">
+        <div class="preloader__fill" id="preloaderFill"></div>
+      </div>
+    </div>
+
+    <!-- Grain -->
+    <div class="grain" aria-hidden="true"></div>
+
+    <script type="module" src="/src/js/main.js"></script>
+  </body>
+</html>

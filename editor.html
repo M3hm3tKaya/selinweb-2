@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SELIN — Cover-Şarkı Eşleştirme Editörü</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0a; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; padding: 24px; }
+    h1 { font-size: 18px; font-weight: 300; letter-spacing: 0.15em; margin-bottom: 8px; color: #C4A77D; }
+    .subtitle { font-size: 12px; color: #888; margin-bottom: 32px; }
+    .toolbar { display: flex; gap: 12px; margin-bottom: 32px; position: sticky; top: 0; background: #0a0a0a; padding: 12px 0; z-index: 10; border-bottom: 1px solid #222; }
+    .btn { padding: 8px 20px; font-size: 12px; letter-spacing: 0.1em; border: 1px solid #333; background: #161616; color: #e0e0e0; cursor: pointer; transition: all 0.2s; }
+    .btn:hover { border-color: #C4A77D; color: #C4A77D; }
+    .btn--primary { background: #C4A77D; color: #0a0a0a; border-color: #C4A77D; font-weight: 600; }
+    .btn--primary:hover { background: #d4b78d; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; }
+    .card { display: flex; gap: 16px; padding: 16px; background: #131313; border: 1px solid #1e1e1e; transition: border-color 0.2s; }
+    .card:hover { border-color: #333; }
+    .card__img { width: 100px; height: 100px; object-fit: cover; flex-shrink: 0; border: 1px solid #222; }
+    .card__body { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .card__key { font-size: 11px; color: #666; letter-spacing: 0.1em; }
+    .card__select { width: 100%; padding: 6px 8px; font-size: 13px; background: #1a1a1a; color: #e0e0e0; border: 1px solid #2a2a2a; outline: none; }
+    .card__select:focus { border-color: #C4A77D; }
+    .card__preview { font-size: 11px; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card__play { padding: 4px 12px; font-size: 11px; background: none; border: 1px solid #333; color: #888; cursor: pointer; align-self: flex-start; }
+    .card__play:hover { color: #C4A77D; border-color: #C4A77D; }
+    .card.is-changed { border-color: #C4A77D; }
+    .status { font-size: 12px; color: #4a4; padding: 8px; display: none; }
+    .status.is-visible { display: block; }
+    audio { display: none; }
+    .output { margin-top: 24px; padding: 16px; background: #111; border: 1px solid #222; font-family: monospace; font-size: 11px; color: #aaa; white-space: pre-wrap; max-height: 400px; overflow-y: auto; display: none; }
+    .output.is-visible { display: block; }
+  </style>
+</head>
+<body>
+  <h1>SELIN — Cover-Şarkı Eşleştirme</h1>
+  <p class="subtitle">Her kapak görselinin yanında doğru şarkıyı seç. "Kaydet" butonuna basınca kod otomatik güncellenir.</p>
+
+  <div class="toolbar">
+    <button class="btn btn--primary" onclick="saveMapping()">Kaydet (JSON indir)</button>
+    <button class="btn" onclick="showCode()">Kodu Göster</button>
+    <button class="btn" onclick="copyCode()">Kodu Kopyala</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <pre class="output" id="output"></pre>
+
+  <audio id="player"></audio>
+
+  <script>
+    const COVERS = [
+      'cover-01','cover-03','cover-04','cover-07','cover-08',
+      'cover-12','cover-13','cover-15','cover-16','cover-17','cover-19','cover-20',
+      'cover-21','cover-22','cover-23','cover-24','cover-25','cover-26','cover-27','cover-28','cover-29','cover-30',
+      'cover-31','cover-32','cover-33','cover-34','cover-35','cover-36','cover-37','cover-38','cover-39','cover-40',
+      'cover-41','cover-42','cover-43','cover-44','cover-45','cover-46','cover-48','cover-49','cover-50','cover-51',
+      'cover-52','cover-53','cover-54','cover-55','cover-56'
+    ]
+
+    const SONGS = [
+      { id: '6x5x5TX48gcHaaZQpO3f2q', title: 'BAŞKA BİRİ', year: '2026', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/c2c9e0678ffbbd3b015b90d00f1301e035202503' },
+      { id: '1HRq9gouGsn78384HYBKsN', title: 'Sana', year: '2025', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/1b487d29caebeee8ca68936b218024cc9af1791d' },
+      { id: '3W8mAmdDUA9jHe3RxXxiol', title: 'BURN WITH YOU (Kijo Remix)', year: '2025', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/5a8e5855bd7570b4c0cef0d9fe84e77f66141e7f' },
+      { id: '3qgb2kYzagVp7awHY3vvbr', title: 'KARANLIĞIM SENDİN', year: '2025', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/cf4320fe478d43a6a2d5e98e306198487821bbdb' },
+      { id: '46Hogr85yq2tbM2Kaet3k9', title: 'SON DAMLA', year: '2025', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/9cf35ca6ad214ee2ae4f2d266bc1301660ed0369' },
+      { id: '6VP4OTYyQOaJpMQnBxRqZ7', title: 'İyileşiyorum (SAYGI1)', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/9cdea41ff7005be8b08ac07e661a914795cf7378' },
+      { id: '5hyYCEaC704WXeb4saAim4', title: 'SENİ GÖRDÜĞÜM AN', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/de90c5f81766af0bf1aa6d80fef79a5ac38c7c2c' },
+      { id: '2JRsdMaavScKW5ohfCFOgz', title: 'HUMAN', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/8fd8c5446552d1d442379b6abefeb1221af484c9' },
+      { id: '0u3u0mGeWYU0h8tWin4ZCa', title: 'Nereye Kadar', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/a904b96e343064acd08326b7324d22d8bd5d9ccc' },
+      { id: '5YHCDgFcVb7DHyrcgBAvW6', title: 'Sonuna Kadar', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/e88fa0aa72f614e85f628b9781498a1f44a67844' },
+      { id: '05L8jDAOFRNcnRRAQLctLw', title: 'CAN YOU UNDERSTAND ME?', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/00b877f792bae81b10c57ee97352f0512fb4e272' },
+      { id: '1UT4sN4ELZA5EOCtmUVgnn', title: 'Son Defa', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/2159a25bee7d87c19f28188ed22f0c4896e05e45' },
+      { id: '5bqI4hBdL3OOW0wMtjA9Fn', title: 'NE SENLE NE SENSİZ', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/0ac3585714f293a08482e45405910ff121560029' },
+      { id: '502J4yyMf4qTwFshWjUwox', title: 'FARKINDA DEĞİLDİN (Sped Up)', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/5e605d81ddffdc707ff6828845e3f0e648ee8813' },
+      { id: '0hpyV1jNlhTMgyyFhD38FW', title: 'FARKINDA DEĞİLDİN', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/0d5ab697e0e20eeeefc7cc33333e11d95b932ede' },
+      { id: '3g8v8OPkVvNelPPUgdvTUh', title: 'LIGHTS OFF', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/d258f8cff8a8716e1ad1294df934e31a1459d97f' },
+      { id: '49IX3KVi9QmelCBp9iIUIc', title: 'IMMA LIAR', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/c925f77fae8f56748c48513a4c172c7630e16e12' },
+      { id: '62rfXEbU2o06c21kYvu4jN', title: 'Olabilirdik', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/f4801337cf991cb1a8c84358abc84cec9c921f32' },
+      { id: '1uUqPjsPhymf3TkWfbrMzR', title: 'Yalancı Bahar', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/1aee33040483ffa756e35ccd70fb24aad78d9785' },
+      { id: '4SCHVnagxaqrUdMTWlpIfS', title: 'UMUDUM YORULDU', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/ad85ba9832c216c0d18ebb2b4ca1b04b2ba50020' },
+      { id: '04awPGvtHtmPtLaqAVpbLA', title: 'LOVERS HURRICANE', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/0b856ef6c44abb1da25b9683fce536d3816161bd' },
+      { id: '5VRUELtImAcnEItxEjIgpF', title: 'LOVERS HURRICANE (Sped Up)', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/4ca7206a2e7c47fcffbdf8a9ed1aec356233b0b4' },
+      { id: '4JqtD9ezEPr4pe9rtWqL8f', title: 'cool', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/f38af75cf1c99a0eab2f5c8890d90f554b1b53c2' },
+      { id: '3GvdvQ3FXwJyFKsgm6qTSv', title: 'Dönmem Ben Sana', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/7ef6844c7e8da9826e9a8b1b9c63bdbeb63c300a' },
+      { id: '6bRwh3cskYWuCfzQzpsqmg', title: 'His', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/14c31e8d2d98f3bee5b47c92f9d3d42dbb7f33eb' },
+      { id: '2JreBBfR668uVO5ZvOeKjT', title: 'Asi', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/2bad470f86a9484969b383ccb992320ae0200e2e' },
+      { id: '1sQKGjOvLmEFP3AWYFbo63', title: 'U Gave Me Nothing', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/4b6ed3ac520a3f1b427df6e4c91efbc6f8afbdf6' },
+      { id: '6ob0WQW2XZDlKps3ObT14Q', title: 'Give And Take', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/de79a8e942b65ec0161f4ad77007df4831f3f33a' },
+      { id: '4t4pXUYp810CyDS7STqmO2', title: 'Gidip Gel', year: '2021', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/23efaf318280c3c9edd98ede538f091278476916' },
+      { id: '2EkX5zm8UCjqbacr4tflfw', title: 'Fall For You', year: '2021', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/90e553cdff3f162aaaf5e851b456301ebeb8c925' },
+      { id: '0Z2JcqJRdmzm30ejTcIQsu', title: 'Everything We Had', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/484d94981c219cc7d4d170fe71415dc6c1cd3011' },
+      { id: '4WNcduiCmDNfmTEz7JvmLv', title: 'In Control', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/1d53b96abb564f9ba08427c3c5361dd8fbe72f7d' },
+      { id: '0mFHgcStQNDPzzUD1QgusC', title: 'Love Bites', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/658120ec4e2802d3f5523f2d84b699d22ba935b6' },
+      { id: '44xDBQQtyiT1KiTrZO5mDa', title: 'Crash & Burn', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/afb9e59b2b7c5e866789d7e7a051d35c74eca726' },
+      { id: '5VHwDtW9Mpgp0qbnqrYcSw', title: 'Heart in Two', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/6750291eeb9dc50e4234dbf59423e5c791b995e0' },
+      { id: '6ZRt2TU99AxlkDWwa5paZv', title: "It's Just a Feeling", year: '2019', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/d1b78c0108deee1177016a7facf906430d200e29' },
+      { id: '2VzMX886IzmXbV79J8FFFV', title: 'Son Arzum', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/8df1dad2600f23ca3e2928bd2ac01879af39c0e1' },
+      { id: '0kyGY7bztpRgb26xQbFW1b', title: 'Bu Gece', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/f90616edcae963b3bbe5bd59f790fa30b8061c79' },
+      { id: '2CZ0M0TiyfdL5d9PkMIMqE', title: 'Palavra', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/6ac1c9b3cceabcce09e49d0214bee658db34a3dc' },
+      { id: '6tfhfGAucrBP1iOvdkBUN8', title: 'Bu Gece (BKE Remix)', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/2d1e50be9ca2b22ef4cd10dcac609f88fbd877f4' },
+      { id: '6zCTWOe7N8vCbKB9ZA6KsM', title: 'BURN WITH YOU', year: '2025', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/33ce84d0ec33f7caa6f4818459ffbfe44a79a6ee' },
+      { id: '0XiVCH3MDWKTg4Ly4olVhz', title: 'Moonlight (feat. Selin)', year: '2019', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/593ce7c0bcaa47939130e8bd93f963d57593e50f' },
+      { id: '0fMwDS1m5ZJMA0SLTNoZxs', title: 'You & Me (Millbrook & Selin)', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/0fbb78f2817fadcdcd8dcc7fe12c65b573d88089' },
+      { id: '6tw6TiAhBxjzYVgUrj0ddm', title: 'Enemies (Roxen & Selin)', year: '2022', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/2d1dc31bd83d8d3d7eaef9b6231c620a87f6a279' },
+      { id: '52D9Bn7QZXnsDZhKgpyHyt', title: 'All Night (Millbrook & Selin)', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/794a4008b6aa4d097aedfa9c544097f54835ea97' },
+      { id: '6f1Aj9Qf85b0Za8SRJCmbK', title: 'ŞIP', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/9c410f13aba7724074552423a5112694f6e0628e' },
+      { id: '56XsrlnUH5aA3TKK0cTkq3', title: 'Tuz (Sertab Erener & Selin)', year: '2026', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/3f42576c79cbca23a54da9662a9cbf8105157e11' },
+      { id: '5YHCDgFcVb7DHyrcgBAvW6', title: 'Sonuna Kadar', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/e88fa0aa72f614e85f628b9781498a1f44a67844' },
+      { id: '1UT4sN4ELZA5EOCtmUVgnn', title: 'Son Defa', year: '2024', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/2159a25bee7d87c19f28188ed22f0c4896e05e45' },
+      { id: '0kyGY7bztpRgb26xQbFW1b', title: 'Bu Gece', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/f90616edcae963b3bbe5bd59f790fa30b8061c79' },
+      { id: '2CZ0M0TiyfdL5d9PkMIMqE', title: 'Palavra', year: '2023', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/6ac1c9b3cceabcce09e49d0214bee658db34a3dc' },
+      { id: '44xDBQQtyiT1KiTrZO5mDa', title: 'Crash & Burn', year: '2020', type: 'Single', preview: 'https://p.scdn.co/mp3-preview/afb9e59b2b7c5e866789d7e7a051d35c74eca726' },
+      { id: 'none', title: '— Şarkı Yok —', year: '', type: '', preview: '' },
+    ]
+
+    // Current mapping (loaded from localStorage or defaults)
+    let mapping = {}
+    const saved = localStorage.getItem('selin-cover-mapping')
+    if (saved) {
+      mapping = JSON.parse(saved)
+    } else {
+      // Default: sequential assignment
+      COVERS.forEach((cover, i) => {
+        mapping[cover] = SONGS[i % SONGS.length].id
+      })
+    }
+
+    const player = document.getElementById('player')
+    let currentlyPlaying = null
+
+    // Track which songs the user has manually picked (not defaults)
+    let userPicked = {}
+    const savedPicked = localStorage.getItem('selin-cover-picked')
+    if (savedPicked) userPicked = JSON.parse(savedPicked)
+
+    function getUsedSongIds(excludeCover) {
+      // Only count songs that were manually picked by the user
+      const used = new Set()
+      for (const [cover, songId] of Object.entries(mapping)) {
+        if (cover !== excludeCover && userPicked[cover] && songId !== 'none') {
+          used.add(songId)
+        }
+      }
+      return used
+    }
+
+    function render() {
+      const grid = document.getElementById('grid')
+      grid.innerHTML = COVERS.map(cover => {
+        const songId = mapping[cover] || 'none'
+        const song = SONGS.find(s => s.id === songId)
+        const used = getUsedSongIds(cover)
+
+        const options = SONGS
+          .filter(s => s.id === songId || s.id === 'none' || !used.has(s.id))
+          .map(s =>
+            `<option value="${s.id}" ${s.id === songId ? 'selected' : ''}>${s.title}${s.year ? ' (' + s.year + ')' : ''}</option>`
+          ).join('')
+
+        return `
+          <div class="card ${userPicked[cover] ? 'is-changed' : ''}" id="card-${cover}">
+            <img class="card__img" src="/src/assets/covers/${cover}.jpg" alt="${cover}" />
+            <div class="card__body">
+              <span class="card__key">${cover}</span>
+              <select class="card__select" data-cover="${cover}" onchange="onSelect(this)">
+                ${options}
+              </select>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button class="card__play" onclick="playPreview('${cover}')">&#9654; Dinle</button>
+                <span class="card__preview">${song ? song.title : ''}</span>
+              </div>
+            </div>
+          </div>
+        `
+      }).join('')
+    }
+
+    function onSelect(el) {
+      const cover = el.dataset.cover
+      mapping[cover] = el.value
+      userPicked[cover] = true
+      localStorage.setItem('selin-cover-mapping', JSON.stringify(mapping))
+      localStorage.setItem('selin-cover-picked', JSON.stringify(userPicked))
+      // Re-render all to update available options
+      render()
+    }
+
+    function playPreview(cover) {
+      const songId = mapping[cover]
+      const song = SONGS.find(s => s.id === songId)
+      if (!song || !song.preview) return
+
+      if (currentlyPlaying === cover) {
+        player.pause()
+        currentlyPlaying = null
+        return
+      }
+
+      player.src = song.preview
+      player.play()
+      currentlyPlaying = cover
+    }
+
+    function generateCode() {
+      let code = 'const COVER_META = {\n'
+      COVERS.forEach(cover => {
+        const songId = mapping[cover]
+        if (!songId || songId === 'none') return
+        const song = SONGS.find(s => s.id === songId)
+        if (!song) return
+        const title = song.title.replace(/'/g, "\\'")
+        code += `  '${cover}': { title: '${title}', year: '${song.year}', type: '${song.type}', spotifyId: '${song.id}', preview: '${song.preview}' },\n`
+      })
+      code += '}'
+      return code
+    }
+
+    function saveMapping() {
+      localStorage.setItem('selin-cover-mapping', JSON.stringify(mapping))
+      const code = generateCode()
+      const blob = new Blob([code], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'cover-meta.js'
+      a.click()
+      URL.revokeObjectURL(url)
+      showStatus('Dosya indirildi! Bu kodu card-detail.js\'e yapıştır.')
+    }
+
+    function showCode() {
+      const output = document.getElementById('output')
+      output.textContent = generateCode()
+      output.classList.toggle('is-visible')
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(generateCode())
+      showStatus('Kod panoya kopyalandı!')
+    }
+
+    function showStatus(msg) {
+      const el = document.getElementById('status')
+      el.textContent = msg
+      el.classList.add('is-visible')
+      setTimeout(() => el.classList.remove('is-visible'), 3000)
+    }
+
+    render()
+  </script>
+</body>
+</html>

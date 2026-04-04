@@ -1,0 +1,61 @@
+/* Palette A — Warm Void (default) */
+[data-palette='warm'] {
+  --bg: #050505;
+  --card-fill: #161616;
+  --card-border: rgba(255, 255, 255, 0.07);
+  --text-primary: rgba(250, 248, 243, 0.85);
+  --text-secondary: rgba(196, 167, 125, 0.5);
+  --accent: #C4A77D;
+  --grain-opacity: 0.025;
+}
+
+/* Palette B — Cold Void */
+[data-palette='cold'] {
+  --bg: #060608;
+  --card-fill: #141418;
+  --card-border: rgba(200, 200, 255, 0.06);
+  --text-primary: rgba(230, 232, 240, 0.85);
+  --text-secondary: rgba(140, 150, 200, 0.5);
+  --accent: #8090C0;
+  --grain-opacity: 0.02;
+}
+
+/* Palette C — Mono Void */
+[data-palette='mono'] {
+  --bg: #080808;
+  --card-fill: #1a1a1a;
+  --card-border: rgba(255, 255, 255, 0.05);
+  --text-primary: rgba(255, 255, 255, 0.8);
+  --text-secondary: rgba(255, 255, 255, 0.3);
+  --accent: #ffffff;
+  --grain-opacity: 0.03;
+}
+
+:root {
+  /* Fonts */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Outfit', system-ui, sans-serif;
+
+  /* Spacing */
+  --sp-xs: 4px;
+  --sp-sm: 8px;
+  --sp-md: 16px;
+  --sp-lg: 32px;
+  --sp-xl: 64px;
+
+  /* Z-index scale */
+  --z-canvas: 1;
+  --z-video: 10;
+  --z-vignette: 50;
+  --z-grain: 60;
+  --z-overlay: 80;
+  --z-panel-backdrop: 86;
+  --z-panel: 87;
+  --z-nav: 88;
+  --z-palette: 90;
+  --z-preloader: 100;
+
+  /* Panels */
+  --panel-width: 560px;
+  --panel-backdrop: rgba(0, 0, 0, 0.6);
+}

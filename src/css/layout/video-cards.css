@@ -1,0 +1,15 @@
+#videoLayer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-video);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.video-card {
+  position: fixed;
+  object-fit: cover;
+  border: none;
+  overflow: hidden;
+  pointer-events: none;
+}
