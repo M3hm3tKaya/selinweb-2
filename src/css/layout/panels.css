@@ -126,6 +126,16 @@ canvas:not(.is-blurred) {
   bottom: 0;
   right: var(--panel-width);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fixed-size inner container keeps photos' relative positions locked */
+.bio-gallery__inner {
+  position: relative;
+  width: 580px;
+  height: 620px;
 }
 
 .bio-gallery__img {
@@ -138,8 +148,8 @@ canvas:not(.is-blurred) {
 .bio-gallery__img--1 {
   width: 280px;
   height: 380px;
-  top: 8%;
-  left: 28%;
+  top: 0;
+  left: 0;
   transform: rotate(-4deg);
   z-index: 1;
 }
@@ -147,8 +157,8 @@ canvas:not(.is-blurred) {
 .bio-gallery__img--2 {
   width: 240px;
   height: 320px;
-  top: 35%;
-  left: 58%;
+  top: 160px;
+  right: 0;
   transform: rotate(3deg);
   z-index: 2;
 }
@@ -156,8 +166,8 @@ canvas:not(.is-blurred) {
 .bio-gallery__img--3 {
   width: 220px;
   height: 300px;
-  bottom: 8%;
-  left: 32%;
+  bottom: 0;
+  left: 160px;
   transform: rotate(-2deg);
   z-index: 3;
 }

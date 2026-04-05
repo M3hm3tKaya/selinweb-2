@@ -2,14 +2,14 @@ import gsap from 'gsap'
 import { setPanelOpen } from '../engine/card-engine.js'
 import { setSpeedMultiplier } from '../engine/speed-controller.js'
 import { getBioContent, getBioGalleryHTML, getMusicContent, getLiveContent, getContactContent, getMusicFeaturedHTML, MUSIC_DATA } from './panel-content.js'
+import { play as audioPlay, stop as audioStop, fadeOutAndStop, getCurrentSource } from './audio-manager.js'
 
 let backdrop, panel, panelContent
 let currentPanel = null
 let isAnimating = false
 let musicFeaturedEl = null
 let bioGalleryEl = null
-let musicAudio = null
-let currentTrackIndex = -1 // -1 = featured (Başka Biri)
+let currentTrackIndex = -1
 let isFeaturedPlaying = false
 
 const BASKA_BIRI_PREVIEW = 'https://p.scdn.co/mp3-preview/c2c9e0678ffbbd3b015b90d00f1301e035202503'
@@ -38,10 +38,6 @@ export function initPanels() {
 
   panelContent = panel.querySelector('.panel__content')
 
-  musicAudio = new Audio()
-  musicAudio.volume = 0.7
-  musicAudio.loop = true
-
   backdrop.addEventListener('click', closePanel)
   panel.querySelector('.panel__close').addEventListener('click', closePanel)
 
@@ -55,8 +51,7 @@ export function initPanels() {
 // --- Music Player Logic ---
 
 function playFeatured() {
-  musicAudio.src = BASKA_BIRI_PREVIEW
-  musicAudio.play().catch(() => {})
+  audioPlay(BASKA_BIRI_PREVIEW, 'music-featured')
   currentTrackIndex = -1
   isFeaturedPlaying = true
   updateFeaturedBtn(true)
@@ -64,7 +59,7 @@ function playFeatured() {
 }
 
 function pauseFeatured() {
-  musicAudio.pause()
+  audioStop()
   isFeaturedPlaying = false
   updateFeaturedBtn(false)
 }
@@ -73,8 +68,7 @@ function playTrack(index) {
   const track = MUSIC_DATA[index]
   if (!track || !track.preview) return
 
-  musicAudio.src = track.preview
-  musicAudio.play().catch(() => {})
+  audioPlay(track.preview, 'music-list')
   currentTrackIndex = index
   isFeaturedPlaying = false
   updateFeaturedBtn(false)
@@ -82,10 +76,8 @@ function playTrack(index) {
 }
 
 function stopTrack() {
-  musicAudio.pause()
   currentTrackIndex = -1
   clearListActive()
-  // Resume featured
   playFeatured()
 }
 
@@ -101,10 +93,10 @@ function updateListActive(index) {
     const btn = item.querySelector('.panel-music__play-btn')
     if (i === index) {
       item.classList.add('is-playing')
-      btn.classList.add('is-playing')
+      if (btn) btn.classList.add('is-playing')
     } else {
       item.classList.remove('is-playing')
-      btn.classList.remove('is-playing')
+      if (btn) btn.classList.remove('is-playing')
     }
   })
 }
@@ -113,7 +105,8 @@ function clearListActive() {
   const items = panelContent.querySelectorAll('.panel-music__item')
   items.forEach(item => {
     item.classList.remove('is-playing')
-    item.querySelector('.panel-music__play-btn')?.classList.remove('is-playing')
+    const btn = item.querySelector('.panel-music__play-btn')
+    if (btn) btn.classList.remove('is-playing')
   })
 }
 
@@ -150,17 +143,15 @@ function hideBioGallery() {
   })
 }
 
+// --- Music Events ---
+
 function bindMusicEvents() {
-  // Featured cover click → always play
   const coverImg = document.getElementById('featuredCoverImg')
   if (coverImg) {
-    coverImg.addEventListener('click', () => {
-      playFeatured()
-    })
+    coverImg.addEventListener('click', () => playFeatured())
     coverImg.style.cursor = 'pointer'
   }
 
-  // Featured play/pause button
   const featuredBtn = document.getElementById('featuredPlayPause')
   if (featuredBtn) {
     featuredBtn.addEventListener('click', () => {
@@ -172,26 +163,34 @@ function bindMusicEvents() {
     })
   }
 
-  // List play buttons
-  panelContent.addEventListener('click', (e) => {
-    const btn = e.target.closest('.panel-music__play-btn')
-    if (!btn) return
+  // Use event delegation on panel content for list items
+  const listEl = panelContent.querySelector('.panel-music__list')
+  if (listEl) {
+    listEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.panel-music__play-btn')
+      if (!btn) return
+      e.preventDefault()
+      e.stopPropagation()
 
-    const index = parseInt(btn.dataset.index, 10)
-    if (currentTrackIndex === index) {
-      // Same track playing → stop and go back to featured
-      stopTrack()
-    } else {
-      // Play this track
-      playTrack(index)
-    }
-  })
+      const index = parseInt(btn.dataset.index, 10)
+      if (isNaN(index)) return
+
+      if (currentTrackIndex === index) {
+        stopTrack()
+      } else {
+        playTrack(index)
+      }
+    })
+  }
 }
 
 // --- Panel Show/Hide ---
 
 function showMusicFeatured() {
   if (musicFeaturedEl) return
+
+  // Stop any existing audio (e.g. from card detail)
+  audioStop()
 
   musicFeaturedEl = document.createElement('div')
   musicFeaturedEl.innerHTML = getMusicFeaturedHTML()
@@ -207,10 +206,10 @@ function showMusicFeatured() {
   })
 
   // Autoplay featured
-  playFeatured()
-
-  // Bind events after DOM is ready
-  setTimeout(() => bindMusicEvents(), 100)
+  setTimeout(() => {
+    playFeatured()
+    bindMusicEvents()
+  }, 150)
 }
 
 function hideMusicFeatured() {
@@ -219,17 +218,8 @@ function hideMusicFeatured() {
   isFeaturedPlaying = false
   currentTrackIndex = -1
 
-  const fadeAudio = () => {
-    if (musicAudio.volume > 0.05) {
-      musicAudio.volume -= 0.05
-      requestAnimationFrame(fadeAudio)
-    } else {
-      musicAudio.pause()
-      musicAudio.volume = 0.7
-      musicAudio.src = ''
-    }
-  }
-  fadeAudio()
+  // Always stop audio when leaving music panel
+  audioStop()
 
   gsap.to(musicFeaturedEl, {
     opacity: 0,
@@ -252,6 +242,11 @@ export function openPanel(name) {
   if (currentPanel === name) {
     closePanel()
     return
+  }
+
+  // Stop any playing audio from card detail when opening any panel
+  if (getCurrentSource() === 'card-detail') {
+    audioStop()
   }
 
   if (currentPanel === 'music' && name !== 'music') {

@@ -15,6 +15,7 @@ let cardBorder = 'rgba(255, 255, 255, 0.07)'
 let reducedMotion = false
 let currentRingCount = 6
 let panelOpen = false
+let lastFrameTime = 0
 let onCanvasClick = null
 let mouseOffsetX = 0
 let mouseOffsetY = 0
@@ -204,8 +205,13 @@ function drawStatic() {
   ctx.globalAlpha = 1
 }
 
-function draw() {
+function draw(timestamp) {
   if (!running) return
+
+  // Delta-time: normalize to 60fps so speed is consistent across all refresh rates
+  if (!lastFrameTime) lastFrameTime = timestamp
+  const dt = Math.min((timestamp - lastFrameTime) / 16.667, 3) // cap at 3x to avoid jumps
+  lastFrameTime = timestamp
 
   ctx.clearRect(0, 0, W, H)
 
@@ -213,7 +219,7 @@ function draw() {
   mouseOffsetX += (mouseTargetX - mouseOffsetX) * PARALLAX_LERP
   mouseOffsetY += (mouseTargetY - mouseOffsetY) * PARALLAX_LERP
 
-  const speed = getSpeed()
+  const speed = getSpeed() * dt
 
   for (let i = 0; i < cards.length; i++) {
     const prevZ = cards[i].z
@@ -264,6 +270,7 @@ export function start() {
     return
   }
   running = true
+  lastFrameTime = 0
   requestAnimationFrame(draw)
 }
 

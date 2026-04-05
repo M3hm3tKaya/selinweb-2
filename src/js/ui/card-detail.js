@@ -56,9 +56,10 @@ const COVER_META = {
   'cover-56': { title: 'Crash & Burn', year: '2020', type: 'Single', spotifyId: '44xDBQQtyiT1KiTrZO5mDa', preview: 'https://p.scdn.co/mp3-preview/afb9e59b2b7c5e866789d7e7a051d35c74eca726' },
 }
 
+import { play as audioPlay, fadeOutAndStop, stop as audioStop } from './audio-manager.js'
+
 let detailEl = null
 let activeCard = null
-let audioEl = null
 let isOpen = false
 let isAnimating = false
 
@@ -77,10 +78,6 @@ export function initCardDetail() {
     </div>
   `
   document.body.appendChild(detailEl)
-
-  // Reusable audio element
-  audioEl = new Audio()
-  audioEl.volume = 0.7
 
   detailEl.querySelector('.card-detail__backdrop').addEventListener('click', closeDetail)
 
@@ -170,8 +167,7 @@ export function openDetail(card, fromLeft, fromTop, fromSize) {
     }
 
     if (meta.preview) {
-      audioEl.src = meta.preview
-      audioEl.play().catch(() => {})
+      audioPlay(meta.preview, 'card-detail')
     }
   }
 
@@ -244,18 +240,8 @@ export function closeDetail() {
     detailVideo.src = ''
   }
 
-  // Fade out audio
-  const fadeAudio = () => {
-    if (audioEl.volume > 0.05) {
-      audioEl.volume -= 0.05
-      requestAnimationFrame(fadeAudio)
-    } else {
-      audioEl.pause()
-      audioEl.volume = 0.7
-      audioEl.src = ''
-    }
-  }
-  fadeAudio()
+  // Stop audio
+  audioStop()
 
   const cardEl = detailEl.querySelector('.card-detail__card')
   const backdrop = detailEl.querySelector('.card-detail__backdrop')

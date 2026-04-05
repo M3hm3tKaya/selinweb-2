@@ -95,9 +95,11 @@ export function getBioContent() {
 export function getBioGalleryHTML() {
   return `
     <div class="bio-gallery" id="bioGallery">
-      <img class="bio-gallery__img bio-gallery__img--1" src="/bio-1.jpg" alt="Selin live" />
-      <img class="bio-gallery__img bio-gallery__img--2" src="/bio-2.jpg" alt="Selin portrait" />
-      <img class="bio-gallery__img bio-gallery__img--3" src="/bio-3.jpg" alt="Selin portrait" />
+      <div class="bio-gallery__inner">
+        <img class="bio-gallery__img bio-gallery__img--1" src="/bio-1.jpg" alt="Selin live" />
+        <img class="bio-gallery__img bio-gallery__img--2" src="/bio-2.jpg" alt="Selin portrait" />
+        <img class="bio-gallery__img bio-gallery__img--3" src="/bio-3.jpg" alt="Selin portrait" />
+      </div>
     </div>
   `
 }
