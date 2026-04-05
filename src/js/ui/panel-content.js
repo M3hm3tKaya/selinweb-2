@@ -179,23 +179,62 @@ export function getLiveContent() {
   `
 }
 
+export function getLiveGalleryHTML() {
+  return `
+    <div class="live-gallery" id="liveGallery">
+      <div class="live-gallery__inner">
+        <div class="live-gallery__stage">
+          <video class="live-gallery__video" src="/live/perf-1.mp4" muted autoplay playsinline data-index="0"></video>
+          <video class="live-gallery__video" src="/live/perf-2.mp4" muted playsinline data-index="1"></video>
+          <video class="live-gallery__video" src="/live/perf-3.mp4" muted playsinline data-index="2"></video>
+        </div>
+        <div class="live-gallery__dots">
+          <span class="live-gallery__dot is-active"></span>
+          <span class="live-gallery__dot"></span>
+          <span class="live-gallery__dot"></span>
+        </div>
+        <p class="live-gallery__label">Live Performances</p>
+      </div>
+    </div>
+  `
+}
+
+export function getContactGalleryHTML() {
+  return `
+    <div class="contact-gallery" id="contactGallery">
+      <img class="contact-gallery__logo" src="/selin-logo.svg" alt="Selin" />
+    </div>
+  `
+}
+
 export function getContactContent() {
+  const TIKTOK_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>'
+  const SOUNDCLOUD_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.56 8.48v8.09h8.16c1.85 0 3.36-1.51 3.36-3.36 0-1.86-1.51-3.36-3.36-3.36-.38 0-.75.06-1.09.18C18.28 6.63 15.18 4 11.56 4c-.3 0-.56.22-.56.5v3.98zm-1.12-.22c0-.14-.1-.26-.24-.28-.56-.08-1.13-.08-1.68.04-.12.02-.2.14-.2.26v8.28c0 .14.12.26.26.26h1.6c.14 0 .26-.12.26-.26V8.26zm-2.98.72c0-.14-.1-.24-.24-.26-.28-.02-.56 0-.84.04-.14.02-.24.14-.24.28v7.52c0 .14.12.26.26.26h.8c.14 0 .26-.12.26-.26V8.98zm-2.1.92c0-.14-.1-.24-.24-.26-.28-.04-.56-.02-.84.02-.12.02-.22.14-.22.26v6.64c0 .14.12.26.26.26h.8c.14 0 .24-.12.24-.26V9.9zm-2.1.8c0-.12-.1-.24-.24-.24-.28-.02-.56 0-.82.06-.12.02-.2.12-.2.24v5.8c0 .14.1.26.24.26h.78c.14 0 .24-.12.24-.26v-5.86zm-2.1.94c0-.12-.1-.22-.22-.24-.14-.02-.28 0-.42.02-.06 0-.12.02-.18.04-.1.04-.18.14-.18.24v4.88c0 .14.1.26.24.26h.52c.14 0 .24-.12.24-.26v-4.94z"/></svg>'
+
   return `
     <div class="panel-contact">
       <div class="panel-contact__section">
-        <span class="panel-contact__label">Booking & Management</span>
-        <span class="panel-contact__value"><a href="mailto:booking@selingecit.com">booking@selingecit.com</a></span>
+        <span class="panel-contact__label">Contact</span>
+        <span class="panel-contact__value"><a href="mailto:info@selinofficial.com">info@selinofficial.com</a></span>
       </div>
       <div class="panel-contact__section">
         <span class="panel-contact__label">Press Kit</span>
-        <span class="panel-contact__value"><a href="#">Press kit indir (PDF)</a></span>
+        <span class="panel-contact__value"><a href="/SELIN-EPK-2023.pdf" target="_blank">Press Kit (PDF)</a></span>
       </div>
       <div class="panel-contact__section">
         <span class="panel-contact__label">Sosyal Medya</span>
         <div class="panel-contact__socials">
-          <a class="panel-contact__social" href="https://instagram.com/selingecit" target="_blank" aria-label="Instagram">${INSTAGRAM_ICON}</a>
-          <a class="panel-contact__social" href="https://open.spotify.com/artist/selingecit" target="_blank" aria-label="Spotify">${SPOTIFY_ICON}</a>
-          <a class="panel-contact__social" href="https://youtube.com/@selingecit" target="_blank" aria-label="YouTube">${YOUTUBE_ICON}</a>
+          <a class="panel-contact__social" href="https://www.instagram.com/selin.gecit/" target="_blank" aria-label="Instagram">${INSTAGRAM_ICON}</a>
+          <a class="panel-contact__social" href="https://www.tiktok.com/@selingecitmusic" target="_blank" aria-label="TikTok">${TIKTOK_ICON}</a>
+          <a class="panel-contact__social" href="https://www.youtube.com/selinmusic" target="_blank" aria-label="YouTube">${YOUTUBE_ICON}</a>
+        </div>
+      </div>
+      <div class="panel-contact__section">
+        <span class="panel-contact__label">Müzik Platformları</span>
+        <div class="panel-contact__socials">
+          <a class="panel-contact__social" href="https://open.spotify.com/artist/5xkqotsRPu6KQ4PiWjSGQf" target="_blank" aria-label="Spotify">${SPOTIFY_ICON}</a>
+          <a class="panel-contact__social" href="https://music.apple.com/us/artist/selin/1493487667" target="_blank" aria-label="Apple Music">${APPLE_ICON}</a>
+          <a class="panel-contact__social" href="https://soundcloud.com/selingecitmusic" target="_blank" aria-label="SoundCloud">${SOUNDCLOUD_ICON}</a>
         </div>
       </div>
     </div>

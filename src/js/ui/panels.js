@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import { setPanelOpen } from '../engine/card-engine.js'
 import { setSpeedMultiplier } from '../engine/speed-controller.js'
-import { getBioContent, getBioGalleryHTML, getMusicContent, getLiveContent, getContactContent, getMusicFeaturedHTML, MUSIC_DATA } from './panel-content.js'
+import { getBioContent, getBioGalleryHTML, getMusicContent, getLiveContent, getLiveGalleryHTML, getContactContent, getContactGalleryHTML, getMusicFeaturedHTML, MUSIC_DATA } from './panel-content.js'
 import { play as audioPlay, stop as audioStop, fadeOutAndStop, getCurrentSource } from './audio-manager.js'
 
 let backdrop, panel, panelContent
@@ -9,6 +9,10 @@ let currentPanel = null
 let isAnimating = false
 let musicFeaturedEl = null
 let bioGalleryEl = null
+let liveGalleryEl = null
+let contactGalleryEl = null
+let liveSlideTimer = null
+let liveSlideIndex = 0
 let currentTrackIndex = -1
 let isFeaturedPlaying = false
 
@@ -143,6 +147,103 @@ function hideBioGallery() {
   })
 }
 
+// --- Live Gallery ---
+
+function showLiveGallery() {
+  if (liveGalleryEl) return
+
+  liveGalleryEl = document.createElement('div')
+  liveGalleryEl.innerHTML = getLiveGalleryHTML()
+  liveGalleryEl = liveGalleryEl.firstElementChild
+  document.body.appendChild(liveGalleryEl)
+
+  gsap.fromTo(liveGalleryEl, { opacity: 0 }, {
+    opacity: 1,
+    duration: 0.6,
+    delay: 0.2,
+    ease: 'power2.out',
+  })
+
+  // Start slideshow
+  liveSlideIndex = 0
+  const videos = liveGalleryEl.querySelectorAll('.live-gallery__video')
+  const dots = liveGalleryEl.querySelectorAll('.live-gallery__dot')
+
+  if (videos.length) {
+    videos[0].classList.add('is-active')
+    videos[0].play().catch(() => {})
+  }
+
+  liveSlideTimer = setInterval(() => {
+    videos[liveSlideIndex].classList.remove('is-active')
+    dots[liveSlideIndex].classList.remove('is-active')
+
+    liveSlideIndex = (liveSlideIndex + 1) % videos.length
+
+    videos[liveSlideIndex].classList.add('is-active')
+    dots[liveSlideIndex].classList.add('is-active')
+    videos[liveSlideIndex].currentTime = 0
+    videos[liveSlideIndex].play().catch(() => {})
+  }, 6000)
+}
+
+function hideLiveGallery() {
+  if (!liveGalleryEl) return
+
+  clearInterval(liveSlideTimer)
+  liveSlideTimer = null
+  liveSlideIndex = 0
+
+  liveGalleryEl.querySelectorAll('video').forEach(v => {
+    v.pause()
+    v.src = ''
+  })
+
+  gsap.to(liveGalleryEl, {
+    opacity: 0,
+    duration: 0.3,
+    onComplete: () => {
+      if (liveGalleryEl) {
+        liveGalleryEl.remove()
+        liveGalleryEl = null
+      }
+    },
+  })
+}
+
+// --- Contact Gallery ---
+
+function showContactGallery() {
+  if (contactGalleryEl) return
+
+  contactGalleryEl = document.createElement('div')
+  contactGalleryEl.innerHTML = getContactGalleryHTML()
+  contactGalleryEl = contactGalleryEl.firstElementChild
+  document.body.appendChild(contactGalleryEl)
+
+  gsap.fromTo(contactGalleryEl, { opacity: 0 }, {
+    opacity: 1,
+    duration: 0.8,
+    delay: 0.2,
+    ease: 'power2.out',
+  })
+}
+
+function hideContactGallery() {
+  if (!contactGalleryEl) return
+
+  gsap.to(contactGalleryEl, {
+    opacity: 0,
+    duration: 0.3,
+    onComplete: () => {
+      if (contactGalleryEl) {
+        contactGalleryEl.remove()
+        contactGalleryEl = null
+      }
+    },
+  })
+}
+
 // --- Music Events ---
 
 function bindMusicEvents() {
@@ -255,6 +356,12 @@ export function openPanel(name) {
   if (currentPanel === 'bio' && name !== 'bio') {
     hideBioGallery()
   }
+  if (currentPanel === 'live' && name !== 'live') {
+    hideLiveGallery()
+  }
+  if (currentPanel === 'contact' && name !== 'contact') {
+    hideContactGallery()
+  }
 
   if (currentPanel) {
     isAnimating = true
@@ -267,6 +374,8 @@ export function openPanel(name) {
         currentPanel = name
         if (name === 'music') showMusicFeatured()
         if (name === 'bio') showBioGallery()
+        if (name === 'live') showLiveGallery()
+        if (name === 'contact') showContactGallery()
         window.dispatchEvent(new CustomEvent('panel:open', { detail: { name } }))
         isAnimating = false
       },
@@ -299,6 +408,8 @@ export function openPanel(name) {
 
   if (name === 'music') showMusicFeatured()
   if (name === 'bio') showBioGallery()
+  if (name === 'live') showLiveGallery()
+  if (name === 'contact') showContactGallery()
 
   window.dispatchEvent(new CustomEvent('panel:open', { detail: { name } }))
 }
@@ -310,6 +421,8 @@ export function closePanel() {
 
   hideMusicFeatured()
   hideBioGallery()
+  hideLiveGallery()
+  hideContactGallery()
 
   gsap.to(panel, { x: '100%', duration: 0.4, ease: 'power3.in' })
   gsap.to(backdrop, {

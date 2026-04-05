@@ -414,6 +414,100 @@ canvas:not(.is-blurred) {
   height: 18px;
 }
 
+/* Contact gallery — left side, logo */
+.contact-gallery {
+  position: fixed;
+  z-index: var(--z-panel);
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: var(--panel-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.contact-gallery__logo {
+  width: clamp(280px, 50%, 500px);
+  height: auto;
+  opacity: 1;
+  filter: drop-shadow(0 0 60px rgba(196, 167, 125, 0.15));
+}
+
+/* Live gallery — left side, slideshow */
+.live-gallery {
+  position: fixed;
+  z-index: var(--z-panel);
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: var(--panel-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.live-gallery__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.live-gallery__stage {
+  position: relative;
+  width: clamp(560px, 84%, 960px);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.6);
+  border: none;
+}
+
+.live-gallery__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.live-gallery__video.is-active {
+  opacity: 1;
+}
+
+.live-gallery__dots {
+  display: flex;
+  gap: var(--sp-sm);
+  margin-top: var(--sp-lg);
+}
+
+.live-gallery__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.4s ease;
+}
+
+.live-gallery__dot.is-active {
+  background: var(--accent);
+}
+
+.live-gallery__label {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: var(--sp-md);
+}
+
 /* Live panel */
 .panel-live__section-title {
   font-family: var(--font-body);
@@ -548,6 +642,14 @@ canvas:not(.is-blurred) {
   }
 
   .bio-gallery {
+    display: none;
+  }
+
+  .live-gallery {
+    display: none;
+  }
+
+  .contact-gallery {
     display: none;
   }
 }
