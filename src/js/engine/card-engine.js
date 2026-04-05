@@ -1,4 +1,4 @@
-import { project } from './projection.js'
+import { project, _result as _projResult } from './projection.js'
 import { wrapZ, calcOpacity, Z_START, Z_END, Z_RANGE } from './z-manager.js'
 import { getSpeed, addScrollDelta } from './speed-controller.js'
 import { getSlotCount, createCards, getSpacedPosition } from '../cards/card-pool.js'
@@ -16,6 +16,7 @@ let reducedMotion = false
 let currentRingCount = 6
 let panelOpen = false
 let lastFrameTime = 0
+function zSortDesc(a, b) { return b.z - a.z }
 let onCanvasClick = null
 let mouseOffsetX = 0
 let mouseOffsetY = 0
@@ -184,22 +185,22 @@ function drawCard(card, left, top, size, opacity) {
 
 function drawStatic() {
   ctx.clearRect(0, 0, W, H)
-  cards.sort((a, b) => b.z - a.z)
+  cards.sort(zSortDesc)
 
   for (let i = 0; i < cards.length; i++) {
     const card = cards[i]
     const opacity = calcOpacity(card.z)
     if (opacity <= 0) continue
 
-    const p = project(card.x, card.y, card.z, CX + mouseOffsetX, CY + mouseOffsetY)
-    const half = p.size / 2
-    const left = p.sx - half
-    const top = p.sy - half
+    project(card.x, card.y, card.z, CX + mouseOffsetX, CY + mouseOffsetY)
+    const half = _projResult.size / 2
+    const left = _projResult.sx - half
+    const top = _projResult.sy - half
 
-    if (left + p.size < 0 || left > W || top + p.size < 0 || top > H) continue
-    if (p.size < 3) continue
+    if (left + _projResult.size < 0 || left > W || top + _projResult.size < 0 || top > H) continue
+    if (_projResult.size < 3) continue
 
-    drawCard(card, left, top, p.size, opacity)
+    drawCard(card, left, top, _projResult.size, opacity)
   }
 
   ctx.globalAlpha = 1
@@ -234,24 +235,29 @@ function draw(timestamp) {
     cards[i].z = newZ
   }
 
-  cards.sort((a, b) => b.z - a.z)
+  cards.sort(zSortDesc)
+
+  let psx, psy, psize, renderSize, half, left, top, opacity, depthFactor, shiftX, shiftY
 
   for (let i = 0; i < cards.length; i++) {
     const card = cards[i]
-    const opacity = calcOpacity(card.z)
+    opacity = calcOpacity(card.z)
 
     if (opacity <= 0) continue
 
-    // Depth-dependent parallax: close cards shift more, far cards shift less
-    const depthFactor = 1.0 - (card.z / Z_END) * 0.7
-    const shiftX = mouseOffsetX * depthFactor
-    const shiftY = mouseOffsetY * depthFactor
+    depthFactor = 1.0 - (card.z / Z_END) * 0.7
+    shiftX = mouseOffsetX * depthFactor
+    shiftY = mouseOffsetY * depthFactor
 
-    const p = project(card.x, card.y, card.z, CX + shiftX, CY + shiftY)
-    const renderSize = card.isIntro ? p.size * 1.4 : p.size
-    const half = renderSize / 2
-    const left = p.sx - half
-    const top = p.sy - half
+    project(card.x, card.y, card.z, CX + shiftX, CY + shiftY)
+    psx = _projResult.sx
+    psy = _projResult.sy
+    psize = _projResult.size
+
+    renderSize = card.isIntro ? psize * 1.4 : psize
+    half = renderSize * 0.5
+    left = psx - half
+    top = psy - half
 
     if (left + renderSize < 0 || left > W || top + renderSize < 0 || top > H) continue
     if (renderSize < 0.5) continue
