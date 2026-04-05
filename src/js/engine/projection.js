@@ -1,6 +1,6 @@
 const FOV = 400
 const IS_MOBILE = window.innerWidth < 768
-const FOV_SPREAD = IS_MOBILE ? 550 : 1040
+const FOV_SPREAD = IS_MOBILE ? 908 : 1040
 const CARD_WORLD_SIZE = IS_MOBILE ? 300 : 260
 
 export function project(x, y, z, cx, cy) {
