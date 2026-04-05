@@ -36,7 +36,9 @@ function getRingCount() {
 function setup() {
   canvas = document.getElementById('c')
   ctx = canvas.getContext('2d')
-  dpr = window.devicePixelRatio || 1
+  // Cap DPR on Safari to reduce paint work (Retina = 4x pixels)
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+  dpr = isSafari ? Math.min(window.devicePixelRatio || 1, 1.5) : (window.devicePixelRatio || 1)
 
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -159,14 +161,14 @@ function drawCard(card, left, top, size, opacity) {
         if (!card._cache || frameCount % 3 === 0) {
           if (!card._cache) {
             card._cache = document.createElement('canvas')
-            card._cache.width = 256
-            card._cache.height = 256
+            card._cache.width = 128
+            card._cache.height = 128
           }
           const cctx = card._cache.getContext('2d')
           const cropSize = Math.min(vw, vh)
           const sx = (vw - cropSize) / 2
           const sy = (vh - cropSize) / 2
-          cctx.drawImage(card.videoEl, sx, sy, cropSize, cropSize, 0, 0, 256, 256)
+          cctx.drawImage(card.videoEl, sx, sy, cropSize, cropSize, 0, 0, 128, 128)
         }
         ctx.drawImage(card._cache, left, top, size, size)
       } else {
@@ -270,7 +272,7 @@ function draw(timestamp) {
     top = psy - half
 
     if (left + renderSize < 0 || left > W || top + renderSize < 0 || top > H) continue
-    if (renderSize < 0.5) continue
+    if (renderSize < 2) continue
 
     drawCard(card, left, top, renderSize, opacity)
   }
