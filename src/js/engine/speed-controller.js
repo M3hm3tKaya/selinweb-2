@@ -1,5 +1,5 @@
 const DEFAULT_SPEED = 1.2
-const MOBILE_BOOST = window.innerWidth < 768 ? 1.2 : 1.0
+const MOBILE_BOOST = window.innerWidth < 768 ? 1.68 : 1.0
 let scrollVelocity = 0
 let speedMultiplier = 1.0
 
