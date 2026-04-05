@@ -37,6 +37,7 @@
 
 .card-detail__info {
   padding: var(--sp-lg);
+  min-width: 280px;
 }
 
 .card-detail__title {
@@ -46,6 +47,7 @@
   letter-spacing: 0.05em;
   color: var(--text-primary);
   margin-bottom: var(--sp-xs);
+  white-space: nowrap;
 }
 
 .card-detail__meta {

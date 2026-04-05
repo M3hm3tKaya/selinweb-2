@@ -183,7 +183,7 @@ export function openDetail(card, fromLeft, fromTop, fromSize) {
   const infoEl = detailEl.querySelector('.card-detail__info')
   const backdrop = detailEl.querySelector('.card-detail__backdrop')
 
-  const targetSize = Math.min(320, window.innerWidth * 0.4)
+  const targetSize = Math.min(360, window.innerWidth * 0.45)
   const targetLeft = (window.innerWidth - targetSize) / 2
   const isVideo = card.type === 'video'
   const targetTop = isVideo
