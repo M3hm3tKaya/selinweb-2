@@ -508,6 +508,17 @@ canvas:not(.is-blurred) {
   margin-top: var(--sp-md);
 }
 
+/* Contact mobile logo — hidden on desktop, shown on mobile */
+.panel-contact__logo-mobile {
+  display: none;
+}
+
+.panel-contact__logo-mobile img {
+  width: 180px;
+  height: auto;
+  opacity: 0.6;
+}
+
 /* Live panel */
 .panel-live__section-title {
   font-family: var(--font-body);
@@ -651,5 +662,11 @@ canvas:not(.is-blurred) {
 
   .contact-gallery {
     display: none;
+  }
+
+  .panel-contact__logo-mobile {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--sp-xl);
   }
 }

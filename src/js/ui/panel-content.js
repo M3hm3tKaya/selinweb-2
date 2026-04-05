@@ -237,6 +237,9 @@ export function getContactContent() {
           <a class="panel-contact__social" href="https://soundcloud.com/selingecitmusic" target="_blank" aria-label="SoundCloud">${SOUNDCLOUD_ICON}</a>
         </div>
       </div>
+      <div class="panel-contact__logo-mobile">
+        <img src="/selin-logo.svg" alt="Selin" />
+      </div>
     </div>
   `
 }
