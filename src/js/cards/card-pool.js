@@ -4,7 +4,7 @@ import { CARD_WORLD_SIZE } from '../engine/projection.js'
 
 // Desktop: 50, Tablet(5): 38, Mobile(4): 26
 const RING_COUNTS = [2, 6, 8, 10, 12, 12]
-const MAX_RADIUS = window.innerWidth < 768 ? 578 : 650
+const MAX_RADIUS = window.innerWidth < 768 ? 434 : 650
 const MIN_DIST = CARD_WORLD_SIZE * 2.2 // ~440 world units = 1 card gap
 
 export function getSlotCount(maxRings) {
