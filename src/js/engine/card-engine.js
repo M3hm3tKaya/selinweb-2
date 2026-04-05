@@ -157,20 +157,10 @@ function drawCard(card, left, top, size, opacity) {
       const vw = card.videoEl.videoWidth
       const vh = card.videoEl.videoHeight
       if (vw && vh) {
-        // Cache video frame to offscreen canvas (avoids per-frame decode in Safari)
-        if (!card._cache || frameCount % 3 === 0) {
-          if (!card._cache) {
-            card._cache = document.createElement('canvas')
-            card._cache.width = 128
-            card._cache.height = 128
-          }
-          const cctx = card._cache.getContext('2d')
-          const cropSize = Math.min(vw, vh)
-          const sx = (vw - cropSize) / 2
-          const sy = (vh - cropSize) / 2
-          cctx.drawImage(card.videoEl, sx, sy, cropSize, cropSize, 0, 0, 128, 128)
-        }
-        ctx.drawImage(card._cache, left, top, size, size)
+        const cropSize = Math.min(vw, vh)
+        const sx = (vw - cropSize) / 2
+        const sy = (vh - cropSize) / 2
+        ctx.drawImage(card.videoEl, sx, sy, cropSize, cropSize, left, top, size, size)
       } else {
         ctx.fillStyle = cardFill
         ctx.fillRect(left, top, size, size)
