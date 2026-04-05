@@ -19,8 +19,11 @@
   z-index: var(--z-panel);
   background: rgba(12, 12, 12, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
   cursor: default;
+}
+
+.card-detail__media {
+  overflow: hidden;
 }
 
 .card-detail__media img {
