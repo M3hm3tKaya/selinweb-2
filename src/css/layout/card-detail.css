@@ -47,7 +47,7 @@
   letter-spacing: 0.05em;
   color: var(--text-primary);
   margin-bottom: var(--sp-xs);
-  white-space: nowrap;
+  word-break: break-word;
 }
 
 .card-detail__meta {
