@@ -16,6 +16,7 @@ let reducedMotion = false
 let currentRingCount = 6
 let panelOpen = false
 let lastFrameTime = 0
+let frameCount = 0
 function zSortDesc(a, b) { return b.z - a.z }
 let onCanvasClick = null
 let mouseOffsetX = 0
@@ -154,11 +155,20 @@ function drawCard(card, left, top, size, opacity) {
       const vw = card.videoEl.videoWidth
       const vh = card.videoEl.videoHeight
       if (vw && vh) {
-        // Center-crop to square (object-fit: cover equivalent)
-        const cropSize = Math.min(vw, vh)
-        const sx = (vw - cropSize) / 2
-        const sy = (vh - cropSize) / 2
-        ctx.drawImage(card.videoEl, sx, sy, cropSize, cropSize, left, top, size, size)
+        // Cache video frame to offscreen canvas (avoids per-frame decode in Safari)
+        if (!card._cache || frameCount % 3 === 0) {
+          if (!card._cache) {
+            card._cache = document.createElement('canvas')
+            card._cache.width = 256
+            card._cache.height = 256
+          }
+          const cctx = card._cache.getContext('2d')
+          const cropSize = Math.min(vw, vh)
+          const sx = (vw - cropSize) / 2
+          const sy = (vh - cropSize) / 2
+          cctx.drawImage(card.videoEl, sx, sy, cropSize, cropSize, 0, 0, 256, 256)
+        }
+        ctx.drawImage(card._cache, left, top, size, size)
       } else {
         ctx.fillStyle = cardFill
         ctx.fillRect(left, top, size, size)
@@ -266,6 +276,7 @@ function draw(timestamp) {
   }
 
   ctx.globalAlpha = 1
+  frameCount++
 
   requestAnimationFrame(draw)
 }

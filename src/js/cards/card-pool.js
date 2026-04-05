@@ -5,7 +5,7 @@ import { CARD_WORLD_SIZE } from '../engine/projection.js'
 // Desktop: 50, Tablet(5): 38, Mobile(4): 26
 const RING_COUNTS = [2, 6, 8, 10, 12, 12]
 const MAX_RADIUS = window.innerWidth < 768 ? 434 : 650
-const MIN_DIST = CARD_WORLD_SIZE * 2.2 // ~440 world units = 1 card gap
+const MIN_DIST = CARD_WORLD_SIZE * 2.2
 
 export function getSlotCount(maxRings) {
   const n = maxRings || RING_COUNTS.length
@@ -14,46 +14,40 @@ export function getSlotCount(maxRings) {
   return total
 }
 
+// Reusable position object — no GC pressure
+const _pos = { x: 0, y: 0 }
+
 function randomDiskPosition() {
   const angle = Math.random() * Math.PI * 2
   const radius = Math.sqrt(Math.random()) * MAX_RADIUS
-  return {
-    x: Math.cos(angle) * radius,
-    y: Math.sin(angle) * radius,
-  }
+  _pos.x = Math.cos(angle) * radius
+  _pos.y = Math.sin(angle) * radius
+  return _pos
 }
 
-// Find a position that doesn't overlap with Z-neighbors
-export function getSpacedPosition(cards, targetZ) {
-  const zThreshold = getZSpacing(cards.length) * 3
-  const neighbors = []
+// Pre-compute a pool of valid positions at init
+const POOL_SIZE = 200
+const positionPool = []
 
-  for (let i = 0; i < cards.length; i++) {
-    if (Math.abs(cards[i].z - targetZ) < zThreshold) {
-      neighbors.push(cards[i])
-    }
+function buildPositionPool() {
+  for (let i = 0; i < POOL_SIZE; i++) {
+    const angle = Math.random() * Math.PI * 2
+    const radius = Math.sqrt(Math.random()) * MAX_RADIUS
+    positionPool.push({
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
+    })
   }
+}
+buildPositionPool()
 
-  for (let attempt = 0; attempt < 30; attempt++) {
-    const pos = randomDiskPosition()
-    let valid = true
-
-    for (let i = 0; i < neighbors.length; i++) {
-      const dx = pos.x - neighbors[i].x
-      const dy = pos.y - neighbors[i].y
-      if (dx * dx + dy * dy < MIN_DIST * MIN_DIST) {
-        valid = false
-        break
-      }
-    }
-
-    if (valid) return pos
-  }
-
-  return randomDiskPosition()
+// Fast wrap position — just pick from pool, no collision check
+let poolIndex = 0
+export function getSpacedPosition() {
+  poolIndex = (poolIndex + 1) % POOL_SIZE
+  return positionPool[poolIndex]
 }
 
-// Simple random position (no collision check) — used as fallback
 export function getRandomPosition() {
   return randomDiskPosition()
 }
@@ -61,14 +55,33 @@ export function getRandomPosition() {
 export function createCards(slotCount) {
   const zSpacing = getZSpacing(slotCount)
   const cards = []
+  const minDistSq = MIN_DIST * MIN_DIST
 
   for (let i = 0; i < slotCount; i++) {
     const jitter = (Math.random() - 0.5) * zSpacing * 0.4
-    const z = Z_START + i * zSpacing + jitter
-    const clampedZ = Math.max(Z_START, Math.min(Z_START + Z_RANGE - 1, z))
+    const clampedZ = Math.max(Z_START, Math.min(Z_START + Z_RANGE - 1, Z_START + i * zSpacing + jitter))
 
-    // Place with spacing check against already-placed cards
-    const pos = getSpacedPosition(cards, clampedZ)
+    // Initial placement uses collision check (only at init, not per-frame)
+    let pos
+    const zThreshold = zSpacing * 3
+    for (let attempt = 0; attempt < 20; attempt++) {
+      randomDiskPosition()
+      let valid = true
+      for (let j = 0; j < cards.length; j++) {
+        if (Math.abs(cards[j].z - clampedZ) > zThreshold) continue
+        const dx = _pos.x - cards[j].x
+        const dy = _pos.y - cards[j].y
+        if (dx * dx + dy * dy < minDistSq) {
+          valid = false
+          break
+        }
+      }
+      if (valid) {
+        pos = { x: _pos.x, y: _pos.y }
+        break
+      }
+    }
+    if (!pos) pos = { x: _pos.x, y: _pos.y }
 
     cards.push({
       x: pos.x,
