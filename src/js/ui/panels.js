@@ -3,6 +3,7 @@ import { setPanelOpen } from '../engine/card-engine.js'
 import { setSpeedMultiplier } from '../engine/speed-controller.js'
 import { getBioContent, getBioGalleryHTML, getMusicContent, getLiveContent, getLiveGalleryHTML, getContactContent, getContactGalleryHTML, getMusicFeaturedHTML, MUSIC_DATA } from './panel-content.js'
 import { play as audioPlay, stop as audioStop, fadeOutAndStop, getCurrentSource } from './audio-manager.js'
+import { closeDetail, isDetailOpen } from './card-detail.js'
 
 let backdrop, panel, panelContent
 let currentPanel = null
@@ -336,6 +337,11 @@ function hideMusicFeatured() {
 
 export function openPanel(name) {
   if (isAnimating) return
+
+  // Close card detail if open
+  if (isDetailOpen()) {
+    closeDetail()
+  }
 
   const contentFn = CONTENT_MAP[name]
   if (!contentFn) return
